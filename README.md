@@ -21,9 +21,9 @@ At the end, this report aims at providing a general research framework on the ac
 
 
 <center>
-
 <img src="logos/granular.png" width="200" align="middle">
-
+</center>
+<center>
 <p float="center">
 <img src="logos/riate.png" width="120" align="middle" hspace="80" vspace="80">
 <img src="logos/cnrs.png" width="50" align="middle" hspace="80" vspace="80">
