@@ -1,0 +1,25 @@
+Destination Points;Producer;Type;Thematic;Advantages;Disadvantages
+Hospitals;GISCO;Institutional;Services;"- No data preparation and completeness assessment - Resource a priori maintained in the future, the quality may improved
+- The only institutional reference layer which provide information on services at EU scale";"- Heterogeneity of hospitals definition amongs EU countries
+- No data for UK, Estonia and candidate countries
+- Heterogenity in hospitals attributes"
+Corine Land Cover specific classes;Copernicus;Institutional;Specific land cover areas;"- No data preparation and completeness assessment
+- Data quality and accuracy
+- Resource regularly updated
+";- Low thematic accuracy in the GRANULAR scope
+Urban Morphological Zones (Tradeve database);Géographie-cités;Research;Urban centers;"- Quality (a long-term research project)
+- The single EU reference layer which makes possible to have information on little and medium sized urban areas
+- Temporal aspect (data available from 1960 to 2010)";"- No update expected
+- Thematic accuracy in the GRANULAR scope
+"
+World Heritage database;World Bank;Institutional;Cultural and natural areas of interest;"- Maintained
+- Interest to catch potential high-values touristic amenities
+- Temporal aspect (data available from 1960 to 2010)";"- A specific aspect of areas of interest
+- Point layer (not adapted for areas such as natural parks). "
+OpenStreetMap POIs;OpenStreetMap;Crowd-sourcing;Services, land use;"- Include everything you want !
+- Free and open source
+- Up-to-date
+- Easy to set up";"- A lot of missing POIs, especially in rural areas and for some countries under contributed
+- Require important consolidations before use (delete double entries, tags consolidation)
+- Lack of harmonization (POIs attributes and definition) in an international context
+- Require to identify precisely what we are looking for. "

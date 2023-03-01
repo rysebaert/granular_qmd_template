@@ -1,0 +1,45 @@
+td {
+  font-size: 0.6rem
+}
+
+table{
+  font-size: 0.6rem;
+}
+
+.quarto-title-block .quarto-title-banner {
+  background-image: url(logos/granular_white.png);
+  background-size: 300px;
+  background-position: left;
+  background-repeat: no-repeat;
+  padding-left: 45px;
+  background-origin: content-box;
+  background-color: #3d7454;
+  color: #FFFFFF;
+}
+
+h1{
+  color: #d52420;
+}
+
+h2{
+  color: #f4c01e;
+}
+
+title{
+  color: #FFFFFF;  
+}
+
+a {
+  color: #d52420;
+  text-decoration: none;
+}
+  a:hover {
+    color: #d52420;
+    text-decoration: underline}
+  a:visited {
+    color: #da8277; }
+  a:visited:hover {
+    color: #da8277; }
+    
+    
+    

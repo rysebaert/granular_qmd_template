@@ -1,0 +1,43 @@
+"COUNTRIES","NB_UNITS","MEDIAN_POP_2018","METHOD"
+"AD",50,0,NA
+"AL",11171,49,"Disaggregation of 2011-2018 changes"
+"AT",42196,41,"Disaggregation of 2011-2018 changes"
+"BA",25644,11,NA
+"BE",24500,124.5,"Correspondence with snapping 1 km grid"
+"BG",38899,7,"Disaggregation of 2018 total pop"
+"CH",22219,45,"Aggregation from fine grid cells"
+"Crossborder",38744,19,NA
+"CY",3696,11,"Disaggregation of 2018 total pop"
+"CZ",46434,33,"Disaggregation of 2011-2018 changes"
+"DE",233870,48,"Disaggregation of 2011-2018 changes"
+"DK",41059,16,"Disaggregation from non snapping 1 km grid"
+"EE",31022,3,"Disaggregation from non snapping 1 km grid"
+"EL",57391,15,"Disaggregation of 2018 total pop"
+"ES",109235,13,"Aggregation from fine grid cells"
+"FI",112146,5,"Aggregation from fine grid cells"
+"FR",381468,21,"Disaggregation of 2011-2018 changes"
+"HR",23280,31,"Disaggregation of 2011-2018 changes"
+"HU",33033,33,"Disaggregation of 2011-2018 changes"
+"IE",60371,19,"Disaggregation from non snapping 1 km grid"
+"IM",397,0,NA
+"IS",3159,0,NA
+"IT",187446,26,"Disaggregation of 2011-2018 changes"
+"LI",19,11,"Correspondence with snapping 1 km grid"
+"LT",39102,6,"Disaggregation of 2011-2018 changes"
+"LU",1762,35,"Disaggregation of 2018 total pop"
+"LV",41852,4,"Disaggregation from non snapping 1 km grid"
+"ME",5656,0,NA
+"MK",6266,30,"Disaggregation of 2018 total pop"
+"MT",336,345,"Disaggregation of 2011-2018 changes"
+"NL",29632,45,"Disaggregation from non snapping 0.25 km2 grid"
+"NO",67876,8,NA
+"PL",197778,41,"Disaggregation of 2011-2018 changes"
+"PT",48005,26,"Disaggregation of 2011-2018 changes"
+"RO",78916,45,"Disaggregation of 2011-2018 changes"
+"RS",44968,13,"Disaggregation of 2011-2018 changes"
+"SE",147931,4,"Disaggregation from non snapping 1 km grid"
+"SI",13013,41,"Aggregation from fine grid cells"
+"SK",17519,56,"Disaggregation of 2011-2018 changes"
+"SM",10,0,NA
+"UK",148560,28,"Disaggregation of 2011-2018 changes"
+"ALL ('EU + CANDIDATES)",2416631,19,NA

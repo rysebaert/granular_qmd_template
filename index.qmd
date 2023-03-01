@@ -1,0 +1,988 @@
+---
+title: "OpenStreetMap data and associated routing engine to produce novel data on rural areas in Europe"
+subtitle: "Review data and methods" 
+author:
+  - name: "Ronan Ysebaert, Marianne Guérois\n, Timothée Giraud, Nicolas Lambert, Matthieu Viry" 
+    affiliation: UAR RIATE (CNRS,  Université Paris Cité) 
+    affiliation-url: https://riate.cnrs.fr/
+date: "`r Sys.Date()`"
+description: "This review of the literature and data availability aims at providing an overview of possible solutions and limitations for creating accessibility indicators at European context. Whatever the solution retained, computing accessibility indicators requires relevant origins / destination pairs and routing engines for computing travel-time indicators. It is afterward possible to propose a large set of indicators derived from these measures. The first part of the document presents at European scale the policy context and the main initiatives developed so far for proposing harmonized indicators on accessibility. The second one reminds the main issues to be considered when calculating accessibility indicators (origin-destination pairs, routing engines, accessibility indicators computation). The third section makes an overview of existing databases and possibilities that could be considered in a European context for the selection of origins / destinations pairs. The fourth part highlights existing solutions for routing engines according to several transportation modes (road, cycle, transport-transit). Finally, the last section discusses on possibilities offered in term of indicator creation when the travel time matrix is calculated with a case-study on hospitals in France. This case-study could be extended in a cross-border context to test this framework within GRANULAR activities. At the end, this report aims at providing a general research framework on the activities that will be held on task 3.3.1 of the GRANULAR project: Crowd-sources data based on OpenStreetMap."
+title-block-banner: "#27445C"
+bibliography: bib.bib
+format:
+  html:
+    theme: sandstone
+    embed-resources: true
+    smooth-scroll: true
+    fontsize: 0.9em
+    code-tools: true
+    code-fold: true
+    toc: true
+    toc-title: Summary
+    toc-depth: 2
+    toc-location: left
+    css: "styles.css"
+    linkcolor: "#d52420"
+---
+
+```{css, echo=FALSE}
+.title {
+  color: white;
+  font-family: Arial;
+}
+```
+
+# Background in EU context on accessibility indicators
+
+Accessibility is a major issue in the EU narratives since a long time and the Maastricht Treaty of 1992, when the concept of Trans-European transport Networks (TEN) was introduced for the first time [@espon2015]. The idea behind is the assumption that transport infrastructures and accessibility are necessary conditions for economic growth in the Union, having a direct impact on the attractiveness of regions for business and people. This led to important researches and indicators creation at regional scale (NUTS2, NUTS3) on potential accessibility to economy (GDP, in general) or labour market (population).  Since the economic crisis of 2010's, global discourse based on economic growth has slightly moved: The Territorial Agenda of the European Union, a policy document agreed at the Informal Ministerial Meeting of Ministers responsible for Spatial Planning and Territorial Development on 2011, stated that a *fair and affordable accessibility to services of general interest, information, knowledge and mobility are essential for territorial cohesion. Providing services and minimising infrastructure barriers can improve competitiveness, and the sustainable and harmonious territorial development of the European Union* [@territorial_agenda_2020]. Still today, in the Territorial Agenda 2030 of the EU [@territorial_agenda_2030] remains the need to enable more equal opportunities, including accessibility and affordability to public services for people and enterprises, whatever they are located (art.6, 26, 27, 30, 47, 50, 62). It underlines also that this *especially concerns remote areas that lack access to public services and economic and social opportunities* (art.28).
+
+Numerous projects and researches have been carried out during the last decades to support these policy perspectives, namely in term of territorial observation within the [ESPON Programme](https://www.espon.eu/) [@espon2004; @espon2015; @espon2017a]. These projects have provided concepts, indicators, tools and recommendations to monitor accessibility measures in a European context. From a methodological point of view, the indicators created within these analytical and conceptual projects combine generally three approaches: 
+
+- **Travel cost**: these indicators measures the accumulated travel cost to reach a destination. Travel costs are popular because easy to interpret (average travel cost, travel time). 
+
+- **Cumulated opportunities**: number of activities, population, economic activities, education or tourist amenities that can be reached in a given time (How many intercontinental flights can be reached from European regions within a maximum travel time of three hours ? How many people can I reach within a day round trip ?) The choice of the time threshold is crucial for the calculation of these indicators and depends ideally on the traveller realities (business traveller, population living in a rural area) and the service this person is looking for (an intermodal connection, a job, a service).
+
+- **Potential accessibility**: it is based on the assumption that the attraction of a destination increases with size, and declines with distance, travel time or cost. Destination size is generally represented by population, but it can also other indicators, such as GDP.  Thus, potential accessibility can be seen as an indicator useful for evaluating the size of a market for suppliers of goods and services [@espon2017a]. It allows to identify the relative competitive position of a territory (generally a region) towards given destinations.
+
+The choice of appropriate origins and destinations depends largely on the scale of analysis: the ESPON TRACC project [@espon2017a] identified several spatial contexts (Global, European, Regional) for selecting relevant destinations: at global level access to global cities and major intercontinental hubs; at European level to main European metropolitan areas; at local scale to basic facilities [@kompil2019] or services of general interest [@espon2017b; @jrc2022]. In that domain, interesting is the initiative led by @diskstra2008, who used a travel time indicator to measure remoteness of rural NUTS 3 regions. A NUTS 3 was considered as peripheral if more than half of its population have a travel time by car of more than 45 minutes to the nearest city (more than 50 000 inhabitants). It classified regions as *Predominantly Urban, Intermediate Close to a City, Intermediate Remote, Predominantly Rural Close to a City and Predominantly Rural Remote*.
+
+All these valuable inputs have provided - and continue to provide - important conceptual, theoretical and methodological basis to follow-up the accessibility of European territories at several territorial scales, and helping policy makers to have a better view on transport and service investments needs. However, three limits can be considered in this existing framework and deserve further investigations:
+
+- **Rural-oriented approach**: Most indicators focus the accessibility of territories to urban functions (transport hubs, employment areas, population centers or services concentrations). It would be interesting to adapt the scope to centrality markers also existing in rural areas.
+
+- **Local scale**: Most indicators and analysis are aggregated at NUTS levels (NUTS2, NUTS3). It provides a valuable picture of the European area. But for some aspects, finer geographical grain is required to discuss on intra-regional disparities, to overcome MAUP effects or more basically to better identify challenges that population have to face locally. According to our knowledge, no harmonized database on accessibility at EU local scale have been fully implemented. 
+
+- **Reproducibility and open source solutions**: This is probably the most important. All the existing indicators produced in a European context use at the moment proprietary data. In general, the project coordinator is also the one who build and maintain (or pay for) the transport network and its attributes (maximum speed, transit, traffic congestion, etc.) required to compute accessibility indicators. This implies breaks in the reproducibility of the workflow and, as a consequence, difficulties to maintain or update core accessibility indicators. Taking the example of the ESPON Program, accessibility indicators updates required several contracts to the owner of the methodology, and the transport network behind. Even if the work done in this context is undoubtedly of high quality, we argue that exploring open source solutions have to be considered to conduct a more in depth democratization of these indicators, their use, their possible updates or, more important, possible criticism on the methodology behind. 
+
+
+
+# General analyticial framework
+
+This section shows the overall analytical framework behind the calculation of accessibility indicators. This allows to introduce the challenges in term of data collection and quality assessment developed in the next sections of the document. 
+
+## Input data
+
+Several data are required to build accessibility and travel time indicators (figure below). 
+
+Origins are required for travel time calculations. In the context of territorial observation in the field of accessibility, territorial divisions can be used (A). In this case, it requires to define geographic coordinates for the origins. Geometric centroids of the territorial units can be considered, or a specific location for each territorial unit of the nomenclature (demographic peak, city hall, etc.).
+
+Two families of potential destinations for travel time indicators can be distinguished: First, destinations to a specific amenity or service, such as hospitals (C). Some attributes are ideally linked to these points of interest (capacity, opening date, private-public operator, etc.). The more accurate the attributes of the points of interest are, the greater the diversity of accessibility indicators will be. Another approach consists in considering as a destination the location that the origins (symmetric matrix). The interest here consists in using masses associated to the territorial units (D), such as population, GDP or jobs to compute specific accessibility indicators afterwards. 
+
+The network infrastructures (B) are obviously a central component in this framework. It corresponds to a structured network of lines (edge-expended graph) with specific attributes (maximum speed, traffic lights, service penalties, stops, directions, etc.). Routing engines use [shortest path algorithms](https://github.com/Telenav/open-source-spec/blob/master/osrm/doc/understanding_osrm_graph_representation.md). One of the most known shortest-path algorithms was proposed by @dijkstra1959. It finds shortest path between two vertices of a graph. Several improvements have been applied to this early proposal, to *speed-up computing and tackle diverse problems of a general and complex graph* [@schweimer2021]. Transport modes (road, rail, air, bike, walk) require to be analyzed separately since they obviously do not follow the same itineraries and characteristics. Moreover, the transport network and its specificities can be affected by natural aspects (lakes, mountains) or by human amenities (a border, a road restricted to specific uses, etc). Routing engines allows to take into account most of the time these characteristics to compute accurate travel time indicators between origin-destination pairs.
+
+> Marianne's comment : xxxx
+
+<center>
+
+:::: {.columns}
+
+::: {.column width="49%"}
+
+![A - A territorial division](figs/concept_01.png)
+
+![C - Services](figs/concept_03.png)
+:::
+
+::: {.column width="2%"}
+::: 
+
+::: {.column width="49%"}
+![B - Network infrastructures](figs/concept_02.png)
+
+![D - Masses](figs/concept_04.png)
+:::
+:::: 
+
+</center>
+
+## Travel time calculation through routing engines
+
+When origin destination pairs are identified and gathered, routing engines allow to get the associated travel geometries, its associated length, duration and sometimes costs. Several providers deliver this service, based on proprietary and commercial (Google routing engines, ...) or free and open source  (OSRM, ...) solutions.
+
+As an example, below is presented outputs coming from two routing engines for the travel Montpellier train station - CIHEAM premises location, by car and by bike. Results are slightly different: 10.8 km and 21 minutes for OSRM ; 7.4 km and 20 minutes for Google. This is explained by travel time algorithms which are not the same according these data sources and the fact that Google takes into consideration traffic congestion. 
+
+By bike the travel corresponds to 6.5 km and 34 minutes for OSRM and 5.9 km for 25 minutes for Google. These examples shows interestingly that in both cases the travel is adapted to the transport mode : shortest path and little roads by bike ; higher speed roads with more distance by car. 
+
+The challenge here consists here in calculating these travel time for a large amount of origin destination pairs. This is indeed not possible to using demo API for OSRM or Google Map API without specific installation or paying the access to large matrixes.  
+
+
+
+<center>
+
+:::: {.columns}
+
+::: {.column width="49%"}
+
+![Travel time by car using OSRM](figs/car_osrm.PNG)
+
+![Travel time by bike using OSRM](figs/bike_osrm.PNG)
+:::
+
+::: {.column width="2%"}
+::: 
+
+::: {.column width="49%"}
+![Travel time by car using Google Maps](figs/car_google.PNG)
+
+![Travel time by bike using Goggole Maps](figs/bike_google.PNG)
+:::
+:::: 
+
+
+
+
+
+## Accessibility indicators
+
+The output of the calculation of origin destination pairs travel time is a heavy matrix that has to be transformed to compute synthetic accessibility indicators, useful for people not necessarily specialized in that domain. Basically, three set of indicators may be envisaged. 
+
+The first set of accessibility indicators that can be produced using these inputs are travel time indicators (A). For each origin, the travel duration (in minutes), length (in kilometres) or cost (in euros) is calculated between input territorial units and specific points of interest. These indicators are easy to understand and it is easily possible to refine their characteristics (difference between the first and the second POI). However, they do not consider directly the specificities of the points of interest (size). 
+
+A second family of indicators relate to cumulated opportunities (B1). It consists in identifying the number of places / POIs reachable in a given period of time. These indicators allow to take into consideration the effective size of POIs and discuss proximity effects: cumulative opportunies of territories located in the neighbourhood of two points of interest will have *de facto* highest values than a territory with a single point of interest located far away from the others. For these indicators, the choice of the threshold of time is very important and require to be conceptualized before, in relation to the point of interest specificities: following the economic concept of *Homo economicus* the time that the population consent to reach a basic service is necessarily lower than an intermediate or a scarce service. 
+
+The third family (C) consists in defining as destinations to accessibility indicators all the territorial units of the study area and their associated mass (population, jobs, etc.). Such approaches allow to identify "functional basins", allowing to say for instance that 2000 jobs are reachable in 15 minutes neighbourhood. With this functional approach (also called functional accessibility), destination masses decay in general from the origins with the distance with mathematical functions (often exponential) making the interpretation of these indicators difficult, but also robust from a methodological point of view. 
+
+Whatever the family of accessibility indicators chosen, some external aspects must sometimes be considered. For specific services, such as hospitals, the international border can have real consequences since the population is affiliated with a national health system (B1). Even a given person lives near a hospital located from the other side of the border, it is certainly more simple from an administrative point of view for her/him to reach an hospital located far away, but in the country of her/his country of citizenship. Thus, measuring the "border effect" can be relevant for specific services integrated in national administrative systems. We took here the example of hospitals, but the same would be true also for schools. 
+
+
+
+<center>
+
+:::: {.columns}
+
+::: {.column width="49%"}
+
+![A - Distance to service](figs/concept_05.png)
+
+![C - Potential accessibility](figs/concept_07.png)
+
+:::
+
+::: {.column width="2%"}
+::: 
+
+::: {.column width="49%"}
+![B1 - Cumulated opportunities](figs/concept_06.png)
+
+![B2 - Cumultated opportunities (with border effects)](figs/concept_08.png)
+
+:::
+:::: 
+
+</center>
+
+As displayed with the theoretical example below, results coming from these approaches may significantly differ and give complementary approaches to accessibility understanding. It is also obvious that the choice of origins, destinations, network infrastructures and routing engines are essential and must be carefully be assessed. 
+
+
+# Possible origins...
+
+For evaluating in a local perspective the accessibility of rural territories, a detailed geographical level of analysis is required. Two official European divisions may be envisaged in that perspective: Local Administrative Units and the European 1km reference grid. These reference geographical layers have the benefit of being used to disseminate EU statistics. The data availability for those territorial divisions is currently scarce but is continuously growing.
+
+## Local administrative units (LAU)
+
+**[Local Administrative Units](https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/lau)** is the smaller territorial division in European nomenclatures. They are the  building blocks of the NUTS and other European statistical regions. The LAU reference layer is updated annually by GISCO (the Geographic Information System of the COmmission). The 2020 layer groups 98613 territorial units, covering the European Union + Albania, Iceland, Macedonia, Norway, Switzerland, Liechtenstein, the Republic of Serbia and the United Kingdom. The main interest of this reference layer is its correspondence with national censuses and its meaning in a policy perspective: these territorial units serve generally as a first level of policy decision. However, this territorial nomenclature is quite heterogeneous and highly subject to MAUP effects: 35 % of the territorial units belongs to France. It combines countries with small territories (median area of municipalities from Switzerland, Czech Republic, Greece, France, Liechtenstein, Malta, Portugal, Slovakia is below 20 km²) and very large ones (above 100 km² for Albania, Bulgaria, Denmark, Estonia, Finland, Ireland, Iceland, Lithuania, Latvia, Macedonia, Norway, Poland, Serbia, Sweden and United Kingdom).
+
+International comparisons consequently require adaptations, as demonstrated in several studies dealing with the MAUP effects [@openshaw1979; @grasland2006; @hamez2008].
+
+```{r, echo = FALSE, warning=FALSE}
+library(flextable)
+meta <- read.csv("data/lau.csv")
+meta$MEDIAN_AREA_KM2 <- round(meta$MEDIAN_AREA_KM2, 0)
+meta$MEDIAN_POP_2020 <- round(meta$MEDIAN_POP_2020, 0)
+myft <- flextable(meta)
+myft <- theme_vanilla(myft)
+myft <- autofit(myft)
+myft <- fontsize(myft, size = 8)
+
+myft
+```
+
+## 1 km EU reference grid
+
+Another possibility consists in using the European 1 kilometer reference grid. The 2018 reference layer includes 2.4 million populated grid cells with Cartesian coordinates, covering 40 countries (European Union, Western Balkans, Scandinavia and little territories such as Andorra or San Marino). French Oversea territories are out of the spatial extent of this reference grid.     
+
+Gridded data has a lot of advantages: grid cells have the same size allowing easy comparisons, they are stable over time and can be assembled to form areas reflecting a specific purpose and study area (NUTS, Functional Areas, mountain regions, water catchments, etc). For all these reasons, their use become more and more popular at EU level. 
+
+Regarding statistical attributes associated to this reference grid, three methodologies are currently used to attribute a number of inhabitants to each square kilometer cell, depending on the countries:
+
+- Aggregation method: a bottom-up approach based on geocoded micro data, aggregated in the 1km cell. 
+- Disaggregation method: when micro data is not available, using statistical data available for the lowest territorial units in combination with auxiliary spatial data (land use and land cover)
+- Hybrid method: a combination of the two previous methods; a compromise between data accuracy and data availability. 
+
+At the end of 2022, only three population counts (2006, 2011 and 2018) are available as statistical attributes associated to the grid. Eurostat expects to deliver an update of the 1 km reference grid in March 2023. 
+
+```{r, echo = FALSE, warning=FALSE}
+library(flextable)
+meta <- read.csv("data/grid.csv")
+myft <- flextable(meta)
+myft <- theme_vanilla(myft)
+myft <- autofit(myft)
+myft <- fontsize(myft, size = 8)
+
+myft
+```
+
+
+
+
+
+# ... and destinations
+
+
+The main issue here consists in identifying appropriate destinations for computing travel times. It requires to overcome the challenge of data quality, accuracy and completeness in the field of rural areas studies. At this stage, it is important to remind that only **very few harmonized resources maintained by institutional data providers** on services of general interest are available in Europe, the [*Base Permanente des Équipements*](https://www.insee.fr/fr/statistiques/3568656), maintained by INSEE in France for example. 
+
+We explore potential solutions to overcome this lack of data sources. Each of them have their own advantages and disadvantages. 
+
+
+## International institutional resources
+
+Several institutional resources can be considered to defined destinations for travel time calculations. As "official" data sources, supported by dedicated staff for that purpose, these datasets are more likely to be subject to quality control, attempts of international harmonization and future updates. 
+
+### GISCO: hospitals
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+This spatial dataset on hospitals is maintained by GISCO and accessible on [Eurostat Website](https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/healthcare-services). It contains point locations on main healthcare services considered to be hospitals by Member States. The data is extracted from official national registers. It is reminded that it *may contain inconstancies or inaccuracies*. Indeed, the hospital definition varies slightly according to each country. For some of them, health facilities need a minimum size, such as a number of beds to be registered as a hospital, but this is not a general rule. 
+
+This dataset covers all European Union (except Estonia) and some associated countries (Norway, Switzerland). There is no data for Candidate Countries from Western Balkans and for the United Kingdom. Eurostat mentions that the coverage is being improved progressively. The last update of this dataset on [Eurostat's GitHub repository](https://github.com/eurostat/basic-services) has been done in 2021.  
+
+
+:::
+
+::: {.column width="40%"}
+
+![GISCO reference data: healthcare services](figs/healthcare.PNG)
+
+::: 
+
+::::
+
+This point layer includes several attributes associated to each hospital. The completeness of the attributes associated to this layer is summarized in the table below. It varies depending on the country and the indicators. This gives nevertheless a good overview of the data the European Commission is looking for. 
+
+This dataset would require important precaution before being used: the fact that it covers more than 4400 hospitals for France and only 790 for Spain highlights probable inconsistencies among European Union countries. 
+
+
+```{r, echo = FALSE, warning=FALSE}
+#| fig-cap: "With N_Hospital (number of hospitals by country in the GISCO layer), emergency (if healthcare site provides emergency medical services), cap_beds (number of beds), cap_prac (number of practicioners), cap_rooms (number of rooms), facility_type (if the healthcare service provides a specific type of care), public_private (public/private status of the healthcare service), list_specs (list of specialities recogniszed in the European Union and European Economic Area according to the 2005 EU Directive), ref_date (reference date the data refers to). The completeness is expressed in percentage: 0 means no data for all hospitals of the country, 100 a full completeness"
+
+meta <- read.csv("data/hosp.csv")
+myft <- flextable(meta)
+myft <- theme_vanilla(myft)
+myft <- autofit(myft)
+myft <- fontsize(myft, size = 8)
+
+myft
+```
+
+
+Other points of interest (POI) layers are distributed by Eurostat: [Airports and ports](https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/transport-networks#airports13) are also available. These datasets seems to be old and outdated (two versions for 2006 and 2013). It is not clear weather these datasets will be maintained in the future or not. Moreover, airports and ports can be considered far from rural territories interests. 
+
+<!-- In addition, a github repository has been created in the Eurostat organization for [education services](https://github.com/eurostat/basic-services/tree/master/data/education). This data includes only French schools at the moment. It has to be followed.  -->
+
+
+### Land use & Urban Morphological Zones - Copernicus & Géographie-cités. 
+
+Copernicus is the European Union's Earth observation program coordinated and managed for the European Commission by the European Union Agency for the Space Program in partnership with the European Space Agency (ESA) and the EU Member States. The program aims at achieving a global, continuous, autonomous, high quality, wide range Earth observation capacity.
+
+One of the products maintained by the Copernicus program is the [Corine Land Cover (CLC)](https://land.copernicus.eu/pan-european) initiative.
+
+The main advantage of this resource is its accuracy, and the fact that CLC products are regularly updated (initial CLC in 1990, updates produced in 2000, 2006, 2012 and 2018). From a technical perspective, it is possible to use the 1km grid centroids as potential destination. 
+
+However, the thematic accuracy is low: potential destinations would be one of the 44 Corine Land Cover classes, such as the travel time to the nearest forest grid cell. 
+
+It can also be an aggregation of CLC classes, such as [Urban Morphological Zones](https://www.eea.europa.eu/data-and-maps/data#c5=all&c11=&c17=&c0=5&b_start=0&c12=urban+morphological+zones) which are deducted from Corine Land Cover. UMZ are made built from Corine Land Cover classes that are considered to contribute to the urban tissue and functions. In the context of a European research project (ESPON Database 2008-2014), this geographical layer has been enriched by giving a name to UMZ and by creating a correspondence dictionary between UMZ and Local Administrative Units: The **Tradeve database** [@guerois2019], which provides the geographical coverage of urban morphological objects populated by more than 10 000 inhabitants for the whole European space. The table below shows the number of UMZ according to their country of belonging and population classes.  
+
+```{r, echo = FALSE, warning=FALSE}
+#| fig-cap: "Number of UMZ by country and population size (Source: Tradeve database, 2019)"
+
+meta <- read.csv("data/umz_tradeve.csv")
+myft <- flextable(meta)
+myft <- theme_vanilla(myft)
+myft <- autofit(myft)
+myft <- fontsize(myft, size = 8)
+
+myft
+```
+
+The use of this high quality layer can be especially interesting for considering small-sized urban objects, whereas institutional European delineations (Large Urban Zones) covers only urban units with an urban center of at least 50 000 inhabitants (Eurostat, 2021), and thus, measuring accessibility to medium-sized centralities, as demonstrated in a preliminary paper focused on *Grande Région* cross-border area [@ysebaert2021] showing the travel time by car from LAU demographic center to the nearest LAU belonging to a UMZ, calculated with OSRM (a routing engine, detailed in the next section). 
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Travel time by car to the nearest LAU belonging to an UMZ](figs/umz_grande_region.png)
+
+
+:::
+
+::: {.column width="48%"}
+
+![Demographic size of the nearest UMZ accessible by car](figs/nearest_umz_size.png)
+
+::: 
+
+::::
+
+
+
+
+
+### World Heritage list - UNESCO
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+UNESCO maintains the [World Heritage list](https://whc.unesco.org/en/list/?search=&order=country&description=1), comprising sites that must be of outstanding universal value and meet at least one out of ten [selection criteria](https://whc.unesco.org/en/criteria/), based on cultural and natural aspects. 1154 points over the World are georeferenced in the database.  
+
+However, the high heterogeneity of selection criteria makes this layer quite inconsistent: some very large natural parks are summarized in a single point; it combined very localized cultural sites (Pont du Gard) and fuzzy locations ("Prehistoric Pile Dwellings around the Alps (France)"). That being said, this layer may be interesting for identifying points of interest known in a Worldwide perpective.
+
+
+
+:::
+
+::: {.column width="40%"}
+
+![The World Heritage List](figs/world_heritage.PNG)
+
+::: 
+
+::::
+
+
+## OpenStreetMap for services of general interest ? 
+
+Another approach may consists in analyzing the accessibility to Point Of Interest (POI), such as services, using the tags associated to OpenStreetMap objects. OpenStreetMap (OSM) is a well-known crowdsourced project which aims to produce a free vector geographic database of the world. The OpenStreetMap database is one of pioneering and best-known source of Volunteered Geographic Information (VGI)[@goodchild2007]. Free and open source since its creation in 2004 by Steve Coast, a variety of data can be found in OSM, including buildings, land use and road network. [In the last decade, Volunteered Geographic Information caused a paradigm shift [@schmidl2021approach].
+
+OpenStreetMap database has been used in several research projects to obtain georeferenced data on services of general interest. 
+
+### ESPON PROFECY (2016-2017)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+ESPON PROFECY [@espon2017b], a project held in 2016-2017 on European "Inner Peripheries" at local scale, used the OSM database to get locations of services of general interest for building accessibility indicators. Among other, this research project produced a clear paper [@espon2017c] on the advantages and drawbacks related to the use of OSM data for analytic purposes regarding services of general interest and the workflow required to preprocess and use such data. It pointed out the importance of using additional data sources to complement or verify the OSM database. Doctors, hospitals, pharmacies, schools, cinemas, supermarket and convenient stores (retail) and banks were gathered. 
+
+Within this project, OSM data has been used to compute travel-time indicators using a non open source solution (RRG Database) and building a typology at grid cell (2.5 km resolution) displaying the main drivers of inner peripherality (poor economic potentials and poor socio-economic situation, lack of access to centres and/or services, poor accessibility and poor economic potentials/socio-economic situation). 
+
+::: 
+
+::: {.column width="40%"}
+
+![Access to banks by car: share of NUTS-3 regions overlaid by areas of poor access at grid level (%)](figs/profecy.PNG)
+
+::: 
+
+::::
+
+
+### World Bank (2019)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+The World Bank benefited from the advances in GIS technologies and open source code libraries to develop the [Rural Accessibility Mapping](https://www.worldbank.org/en/data/statistical-capacity-building/data-innovation-fund/Rural-accessibility-mapping). This tool is dedicated to road maintenance and service planning, by analyzing the travel times for villagers from banks, schools, hospitals and county seat for several case-study areas (Vietnam, Qianxinan province in China), etc. This project used the OSM data to access points of interest. It seems however that this project was experimental (the tool is not available, the case-studies have not widely been extended).
+
+
+::: 
+
+::: {.column width="40%"}
+
+![Access to maternal health from Guizou's villages (China)](figs/china.PNG)
+
+::: 
+
+::::
+
+
+### OSM completeness on Points of Interest
+
+A lot of research has been carried out on the specific aspect of OpenStreetMap POI's completeness. Most of the time the completeness is assessed by **comparing OSM data to institutional reference datasets and surveys**. 
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+@hennig2019 made a data gap analysis in the city of Salzburg for 40 types of amenities and services related to child and youth-friendly cities. She compared OSM data with authoritative data (Open Governmental Data of the Salzburg city) and survey observations. It revealed that most of targeted services and amenities can be described by tags available in OSM, 44 % of the element type both OSM data and OGD is available, for 29 % only OSM data, for 2 % only OGD, and for 24 % neither OSM data nor OGD exists. It led to the conclusion, for this specific area and for these specific amenities, that *OSM data and authoritative data complete rather than compete with each other*, and depending on the area, *OSM data might not be inferior but more detailed and accurate*.  
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Availability of OSM data and OGD for different types of child and youth relevant elements in Salzburg (Source: Hennig, 2019)](figs/hennig.jpg)
+
+::: 
+
+::::
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+A wider geographical coverage has been made by @arsanjani2016 on OSM land use data in 2014-2016. They used a snapshot of OSM features tagged as `natural` and `landuse` for 10 random metropolitan areas located in Europe at lower scale and for all Europe at a larger scale. In this study, the Global Monitoring and Security Environment Dataset (GMESUA) served as reference data. For these specific features, it revealed that the degree of completeness varies significantly among the countries: While only 1.6 % of land use features in Iceland are mapped, 96 % of Bosnia and Herzegovina are. It represents more than half in Belgium, Germany, the Netherlands or France. At metropolitan scale, completeness index came from 39 % in Frankfurt to 100 % in Bucharest. The paper also showed that the thematic quality of OSM features range from moderate to substantial. Depending on the city, isolated structures, industrial, commercial, public, military and private units, road and rail networks and associated land, sport and leisure facilities, agricultural, semi-natural, wetlands, forests and water reach a substantial rank of accuracies. It concluded that OSM consists in a suitable solution to follow, taking into account that more contributions will be received and consequently higher data quality can be achieved. 
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Completeness index of OpenStreetMap land use features for European countries (Source: Arsanjani, Fonte, 2016)](figs/arsanjani.PNG)
+
+::: 
+
+::::
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+@mashhadi2015 analyzed variations in the completeness of OSM POIs in the Greater London by comparing them to Navteq POIs. A correspondence between the two databases was carried out using the combination of a geographical proximity criteria and a lexicographic one (Levensthein distance). Having calculated at the wards level a completeness index between 0 and 1, they conclude that there is an overall completeness around 0.35 for Greater London, but very heterogeneous depending on the wards: this variation is partly based on center-periphery gradient, but also shows strong heterogeneity within the peripheries. The probability of contribution is higher as the population density is (coefficient of correlation equals to 0.3), and that the location is close to one of the 10 main employment centers is Greater London. On the other hand, the hypothesis of an inverse relationship between completeness and poverty is not validated.  
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![OSM POI's completeness for Greater London (Source: Mashhadi et al., 2015)](figs/mashhadi.PNG)
+
+::: 
+
+::::
+
+
+
+
+Finally, @guerois2020 evaluated the potential of OpenStreetMap data to overcome the lack of reference database on commercial activities in a cross-border context (Grande Région, overlapping France, Belgium, Luxembourg and Germany). Based on a selection of 15 commercial equipments (convenience shops, bakeries, furniture shops, banks, butchers, shoes, electronics, opticians, hairdresser pharmacies, restaurants, gas stations, cafe-pubs, theaters, clothes), and comparing the completeness with a French institutional reference database - *Base Permanente des Équipements (BPE)* - they showed that OSM information is generally rather reliable in densely populated city centers and more random in urban peripheries and rural areas without urban influence (cf map below, on the right). 
+
+This study highlighted also that completeness vary depending on the Point of Interest. Is high for some specific equipments such as theaters, gas stations or cinemas; and very low (completeness rate below 20 % as regards to BPE data) for hairdresser, opticians or butchers. 
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Gaps between the number of POIs in OSM database and BPE in North-Eastern France. An index above 100 means that the OSM database includes more POIs than the ones included in the institutional reference database (Source: Guérois et al., 2020)](figs/B02_ecarts_equip_rel.png)
+::: 
+
+::: {.column width="48%"}
+
+![Completeness of OSM Database in North-Eastern France for a selection of 15 commercial services (number of OSM's POIs / number of BPE's POIs x 100) (Source: Guérois et al. 2020) ](figs/lau2_completeness.png)
+
+::: 
+
+::::
+
+
+This heterogeneity is coupled with strong differences between the countries within the study area, with a strong discontinuity reflecting *a priori* a lower level of contributions on the French side of the border, as compared to the neighbouring countries. 
+
+This research project concludes that in the current state, the OSM database cannot fully compensate the lack of institutional databases for commercial equipments in Germany, Luxembourg and Belgium, except for the central areas of the largest cities and for a limited number of facilities (cafe-restaurants, banks, pharmacies, theaters).
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Linear regression between the density of OSM's POI and total population in a 5 kilometre Gaussian neighbourhood (Source: Guérois et al., 2020)](figs/D09_pot_5k_model.png)
+
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Residuals mapping: a clear border effect on OSM's POIs contribution, all things being equal to the importance of the population (Source: Guérois et al., 2020)](figs/D10_pot_5k_res.png)
+
+::: 
+
+::::
+
+
+
+From all these inputs we can say that the use of POI coming from OpenStreetMap presents significant advantages: it covers the entire world, a lot of services of general interest are available, the spatial resolution is high, the database is continuously updated (thanks to the continuous contributions), its usage is free and its access easy [@espon2017c]. But, it also requires important **consistency checks** due to a lack of international harmonization of the amenities included in OpenStreetMap, poor completeness, multiple database entries, errors and unclear standards. Its use also implies to identify the relevant key-values to catch all the possibilities of contribution referring to a specific service. Most of the studies concluded that OSM can efficiently complete authoritative or institutional data sources.
+
+
+## Summary of possible solutions
+
+```{r, echo = FALSE, warning=FALSE}
+
+meta <- read.csv("data/destinations_overview.csv", sep = ";", fileEncoding = "UTF-8")
+myft <- flextable(meta)
+myft <- theme_vanilla(myft)
+myft <- autofit(myft)
+myft <- fontsize(myft, size = 8)
+
+myft
+```
+
+
+According to literature and databases review, it is obvious that no solutions present both simple, accurate and complete characteristics to be used in the GRANULAR framework. It however appears that the use of institutional databases, such as GISCO hospitals, completed by crowd-sourced data, appears as the most suitable solution to propose an operational and reproducible framework for getting destinations, and making possible updates in the future.
+
+
+#  Routing engines
+
+Starting from the postulate that origins and destinations are available, several routing engines exist and may be used. This section is an overview of existing solutions, both commercial and open source. 
+
+## Non open source (and commercial) solutions
+
+*Routing and navigation has been in the hands of industry players for decades. Unsurprisingly, car manufacturers (Japanese leading the way) were the first ones to commercially distribute car navigation systems in the early 80's, while companies like NavTeq (today HERE) and TomTom were providing the proprietary street data*. [@nolde2020]. It is clear that these solutions won't be considered in the project. It is however interesting to analyze what they propose and in which conditions to better contextualize the advantages of the use of open source solutions. 
+
+### Google 
+
+[Distance Matrix API](https://developers.google.com/maps/documentation/distance-matrix?hl=en) allows to get the travel distance and time for a matrix of origins and destinations. The Google's API makes available several optional parameters, such as:
+
+- ***arrival_time***: Possibility to specify either the departure time or the arrival time
+- ***avoid***: restrictions for the distance calculations (calculated route should avoid toll roads/bridges, highways, etc.)
+- ***mode***: driving, walking, bicycling, transit. 
+- ***traffic_mode***: 3 modes. *best_guess estimates* the best estimate of travel time given what is known about both historical traffic conditions and live traffic. *pessimistic* returns estimates though occasional days with particularly bad traffic conditions. *optimistic* is the opposite.
+- ***transit_mode***: specifies one or more preferred modes of transit (bus and/or subway, train, tram and rail).
+
+Once the request done, a distance matrix is returned, giving the distance, duration, duration in traffic and fare (ticket costs). 
+
+The Distance Matrix API uses a pay-as-you-go pricing model. For a Distance Matrix Advanced and a monthly volume range from 100 000 to 500 000 queries, price corresponds 8 USD per 1000. Taking the example displayed in the last section of the document - access of French LAU (35228 territorial units) to hospitals with surgery care (913 hospitals), e.g. more than 32 million queries, estimated price would be up to 250 000 $. 
+
+
+### Tomtom
+
+TomTom is a Dutch multinational developer and creator of location technology and consumer electronics. This enterprise released the first generation of satellite navigation devices to market in 2004. Based on traffic flow of millions of anonymous mobile phone users, they develop several tools and solutions, such as the [Matrix Routing v2](https://developer.tomtom.com/routing-api/documentation/matrix-routing-v2/matrix-routing-v2-service), which is dedicated to the calculation of a matrix of route summaries for a set of routes defined with origin and destination locations. For every given origin, the service calculates the cost of routing, in term of distance and durations. The maximum size of a matrix (number of origins multiplied by number of destinations) is 1 million for the asynchronous version. For this API, traffic parameter must be:
+
+- **traffic** must be **historical**: Routing and estimated travel time consider historical travel times and long term closures. Traffic jams and short-term closures during the travel time window do not influence routing or travel time. 
+- **routeType** must be **fastest**
+- **travelMode** must be either **car** or **truck**.
+- No other parameters can be used explicitly. 
+
+The price for using the Tomtom's Matrix Routing v2 API (with submission of endpoints) is 4 euros per 1000 requests for Matrix Routing v2 API (with submission of endpoints) and Waypoint Optimization API.
+
+
+### Mapbox
+
+Mapbox is an American provider of custom online maps for websites, applications (navigation, geocoding) and data (traffic data, movement data)
+Mapbox routing solutions intergrating open source routing engines (OSRM or Graphhopper), associating traffic data using mobile applications that uses Mapbox solutions. In total *more than 300 million miles of driving data per day*. Mapbox aggregates that data into speed profiles for the road network. 
+
+The [Mapbox Matrix API](https://docs.mapbox.com/api/navigation/matrix/) returns a matrix showing travel time and distances between coordinates. Four profiles are available: driving, walking, cycling or driving-traffic. For the last profile, Matrix API limits is a maximum of 30 requests per minute. 
+
+The Matrix API is free below 100 000 matrix elements, 800 dollars for 500 000 matrix elements and 6400 dollars for 5 000 000 matrix elements.  
+
+
+### TravelTime
+
+[Traveltime](https://traveltime.com/) is a company funded in 2009 in the UK that presents itself as the best competitive solution for multi-modal routing information, as regards to Google or Mapbox. It proposes driving and public transport model for 80 countries in the World. The data model is based on OpenStreetMap, with additional data collection made by the company to get public transport information (from 1000's different providers and agencies) and estimate better travel time. 
+
+It proposes four transportation types: driving, public transport, walking and cycling. The returned matrix can be distance, travel time, or fares. Travel Time Matrix API Pricing corresponds to 2900 euros for 5 000 000 matrix elements.  
+
+This solution seems suitable for specific case studies since the maximum travel time proposed is below 4 hours and the maximum matrix size is 10 * 2000 elements. 
+
+
+## Open source solutions based on OpenStreetMap
+
+Since the 2000's, multiple open projects changed the landscape of routing and navigation. The development of OSM was the key component for the development of open source routing engines: OSM hosts almost 200 million road segments. *It is arguably the world's biggest open database of physical objects and in many developing countries the best data source* [@nolde2020], supported by a large and growing community, a lot of software dedicated to retrieving OSM data or improving the contribution, and a lot of scientific papers on the completeness of OSM data, and its evolution [@minghini2019].
+
+Nowadays, these engines have gained in popularity, and presents clear advantages: **flexibility** (install and host its own routing service, with customizable parameters), **transparency** (open source code) and **price** (most of them are free).  
+
+Several routing engines are available to compute travel-time calculation by road between a couple of origins and destinations, such as OSRM, OpenTripPlanner or YOURS. All these routing engines use the OpenStreetMap road network and OSM tag **maxspeed** (if available) to calculate the travel-time between two points. This OSM tag defines the maximum legal speed limit for general traffic on a particular road, railway or waterway. If the maximum speed information is missing, which is frequently the case (only 7.4 % of all road elements stored in the OSM world dataset have information on maximum speed in 2019 [@guth2020], [predefined speed limits for each country](https://wiki.openstreetmap.org/wiki/Key:maxspeed) are applied [@keller2020].
+
+<!-- Then, the choice of the most appropriate routing engine depends on the use. Nolde (@nolde2020) made a comparative analysis of some of them, based on experience:  -->
+
+<!-- ![Comparison of open source routing engines (Source: Nolde, 2020)](figs/comparing_routing_engines.PNG) -->
+
+For GRANULAR activities, which imply an heavy calculation of many origins / destinations matrices, OSRM undeniably presents clear advantages: **high performance in term of calculation time**, it is **already operational** (several implementations), it is **easy to set up** and a R package makes the interface between R and the OSRM API [@giraud2022].
+
+## Accuracy of OSM's road network and travel time calculation
+
+A recurrent criticism made to OpenStreetMap is this very high heterogeneity and low completeness, due to the lack of standardized and precise specifications to would allow contributors to provide good quality data [@girres2010]. Even if true, specifically for POIs in rural areas [@guerois2020], the **road network** available in OpenStreetMap can be considered of **good quality**: a study on the road network in Quebec [@moradi2020] highlights the fact that the completeness of the network was equal to 32.91 %, but 70 % of the roads of the province has a positional accuracy better than 5m. Another completeness analysis led by @barrington2019 based on satellite imagery, multilevel regression and postratification model argued that *globally, OSM is ∼83% complete, and more than 40% of countries-incuding several in the developing world have a fully mapped street network*, concluding that *in many places, researchers and polic ymakers can rely on the completeness of OSM, or will soon be able to do so*.
+
+Obviously, outputs of these routing engines deliver theoretical travel-time, without traffic congestion. This should obviously be taken into account, especially in urban contexts.
+Nevertheless, most of these routing engines use some important [properties](https://github.com/Project-OSRM/osrm-backend/blob/master/profiles/car.lua) of the road network to estimate travel-time, such as turn penalties, service penalties (parking, driveway), maximum speed according to the road hierarchy, traffic lights, stops, etc. Moreover, additional transportation profiles are available (pedestrian, bike).
+
+OSRM travel-time has been compared to other routing engines in France [@viry2016]: the METRIC© database (*Mesure des Trajets Inter-Communes / Carreaux*, developed by INSEE) and Google Direction API. This comparison has been made from origins coming from two samples, located in two French departments,  *Ain* and *Hauts-de-Seine*, and destinations located randomly in France. Linear regressions of travel times from pairs of OSRM / METRIC and OSRM / Google highlight strong consistency between datasets. The analysis of the residuals of the regression showed that no relationship between the importance of the residual and the distance of the travel (over and under estimates exist whatever the distance), nor regarding the demographic size of the municipalities of destination. The analysis showed also that the quality of the geographical location of origins and destinations is important to evaluate correctly a travel. 
+
+![Comparing OSRM travel time from Ain and Hauts-de-Seine with Metrics and Google Direction API (Source: Viry, 2016)](figs/comparisons_osrm.PNG)
+
+A similar comparison has been made in China between 100 randomly selected origin / destination pairs with estimated OSRM travel time against those obtained from Google Maps [@sun2021]. This comparison revealed that the results coming from OSRM are very accurate and coincides with free-flow in commercial services. Results are almost the same in Australia [@barbieri2019]: for each Australian state and territory, 1000 routes between Meshing Blocks centroids and the closest hospitals were sampled. Estimated travel times were compared between OSRM and the Google Maps Distance Matrix service. It revealed (table below) that estimated travel times were comparable, with differences on average of less than 5 minutes. 
+
+
+![Average differences is estimated travel times computed by Google Maps and by OSRM across Australien states and territories, from Australian hospitals (Source: Barbieri, 2019)](figs/barbieri.PNG)
+
+
+##  OSRM implementations related to services and amenities
+
+Several experiments can be noticed on the use of routing engines associated to OpenStreetMap data for evaluating travel-time on services and amenities. 
+
+### Car profile
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+On the health thematic, @barbieri2019 used OSRM to estimate travel time between Mesh Blocks centroids to the nearest hospital. The aim of this paper was mostly to demonstrate that the use OSRM is technically possible (using QGIS, OSRM and Python scripts) and relevant as compared to Google direction API. The results are not analyzed in detail. 
+
+![Distribution of shortest time to hospital in Australian states and territories, (Source: Barbieri, 2019)](figs/australia_distribution.PNG)
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Shortest travel time to a hospital from statistical areas level 2 (Source: Barbieri, 2020)](figs/australia.PNG)
+
+::: 
+
+::::
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+In France, similar approaches have been implemented to qualify the evolution of the accessibility of women to maternity wards between 2000 et 2017 [@giraud2019; @drees2021], using the same road network on the two time period. In France again, the same framework has been extended to analyse the accessibility to hospitals with surgery cares [@conti2022]: this study shows the effects of surgery services closures over the last 20 years on the population accessibility to surgery care. It demonstrated that population living in rural areas and sub-categories of the population (employees, workers) are more affected by hospital closures than others. Some results coming from this research are further described in the last section of the document. 
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Impact of the closure of maternities for women aged from 15-49 years in Nièvre department (France) (Source: Giraud, Ysebaert, Pecout, 2020)](figs/nievre.PNG)
+
+::: 
+
+::::
+
+On early care and education, following the approach proposed by @davis2019 in Minnesota (USA), @hurley2022 analyzed differences in childcare accessibility by Australian regions, categorized by remoteness areas. It shows that remote Australian regions have many areas with no childcare supply and very remote Australian regions have a majority of locations with no childcare supply. This result is correlated to the socio-economic status of the population (index of education occupation decile). For every services, all neighbourhoods within a ten-minute drive for metropolitan areas and a twenty-minute drive for regional areas were identified. Then, an exponential decay function was implemented so that neighbourhoods closer to the service received more weighting. Finally the quantity of supply for each territory was measured in a functional driving neighbourhood. 
+
+
+### Bike profile
+
+@szyszkowicz2019 evaluated the "bikeability for commuting" in Sherbrooke (Canada), based on OSM network, residence-workplace data and OSRM travels. The result is a set of bikeability maps, from the point of view of residences the road safety. This paper presents the Level of Traffic Stress index, which assign one of four levels of safety to roads based on level of separation of cyclist from motor traffic. Several implementations of this index based on OSM tags are displayed in the appendix of the report. 
+
+@ysebaert2022 presented the data processing in R to build travel time by bike to climbing areas with OpenStreetMap and OSRM in Paris and its neighbourhood. It is reminded that the slope of the travel is not taken into consideration to compute travel time indicators, which underestimates the duration of some travels. However, it is demonstrated that the OSRM bike profile avoid to take main driving roads.    
+
+
+
+
+## Public transit, are open source solutions available? 
+
+A lot of API on transport are available and provided by transport operators, at national scale ([Deutsche Bahn](https://data.deutschebahn.com/dataset/api-fahrplan.html), [SNCF](https://numerique.sncf.com/startup/api), [Switzerland](https://transport.opendata.ch/), [Spain](https://data.renfe.com/api/1/util/snippet/api_info.html?resource_id=a2368cff-1562-4dde-8466-9635ea3a572a), [Sweden](https://www.trafiklab.se/api), [Netherlands](https://github.com/koch-t/KV78Turbo-OVAPI/wiki), etc.) or at metropolitain level ([Paris](https://data.ratp.fr/api/v1/console/datasets/1.0/search/), [Budapest](https://bkkfutar.docs.apiary.io/#), [London](https://api.tfl.gov.uk/), [Berlin](https://github.com/derhuerst/vbb-rest/blob/3/docs/index.md), etc.). This [GitHub](https://github.com/public-apis/public-apis#transportation) repository lists free APIs for use in software and web development. Transportation APIs is one of the entries of interest of this initiative. 
+
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+Based on these APIs, several implementations and applications have been realised. For instance, this [portal](https://ressources.data.sncf.com/explore/dataset/reutilisations-open-data/table/?sort=nom_reference_de_la_reutilisation) lists all the re-use coming from the French SNCF API. Among others, [oupartiravectgvmax.fr](https://oupartiravectgvmax.fr/) shows the train stations reachable from French train stations in one trip journey with a specific SNCF subscription. The user can choose the departure train station and the duration on site. But obviously, it is only available from French train TGV train stations.
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Où partir avec TGVmax , (Realisation: Basile Bruneau, 2020)](figs/trip_journey_tgvmax.PNG)
+
+::: 
+
+::::
+
+
+The Deutsche Bahn API can be easily queried (cf. [this example](https://github.com/dbopendata/openbahn) in R). It makes possible several implementations. [direkt.bahn.guru](https://direkt.bahn.guru/) is an application showing all direct long-distance railway connections from a given city in most of the European countries. [chronotrains.com](https://www.chronotrains.com/), also based on Deutsche Bahn's API, shows the area reachable from a starting point in given amount of time. Because local transit is not included in the API, there are no journeys available between different stations that can be connected by bus, bike or on foot. The solution it proposes consist in assuming that the distance between to nearby stations (below 10 km) can be traveled at 9 km/h and that train interchanges duration is 20 minutes. For all the train stations available in the Deutsche Bahn's API (covering all European Union except Estonia and Latvia) it is possible to see the area reachable in less than 5 hours by isochrones.
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Direkt Bahn Guru (Realisation: J. Tens & F. Erdmann, 2021)](figs/direkt_bahn_guru.PNG)
+
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Chronotrains.com (Realisation: B. Tran Dinh, 2022)](figs/chrono_train.PNG)
+
+::: 
+
+::::
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+An older example using the Swiss public transport API to get travel times by train to most other small-medium sized cities in Europe is provided by [Empty Pipes](http://emptypipes.org/2015/05/20/europe-isochrone-map/). Isochrone maps are proposed from 35 European starting cities. 
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Isochrone Maps of Europe , (Realisation: Peter Kerpedjiev, 2015)](figs/empty_pipes.PNG)
+
+::: 
+
+::::
+
+
+
+In the global landscape of transportation APIs, it is important to remind that each service has its own specificities: Most transportation APIs refer to their operating areas of interest, which are in general national (national transport companies) or metropolitan (bus, tramway, metros), making the modelling of transport interconnections between transport operators very difficult. Moreover, a lot of users of these APIs argue that central components for analyzing transportation specificities (management of transport interconnections, train frequencies, prices, etc) are generally missing. Finally and when the API proposes origins and destinations in an international way, such as the Deutsch Bahn API, it is often reminded that some train stations are missing or travels require updates.  
+
+
+## Original solutions based on OSM network
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+Last but not least, @nelson2019 measured accessibility indicators to a range of human settlement size classes at one-kilometer spatial resolution using the `gdistance` R package [@vanetten2017]. Estimated travel times from any location on the Earth's surface to the nearest settlement requires a cost surface that estimates the time required to cross each pixel in the surface. They used a friction surface that incorporate *the best available on information on transport networks (...) and travel speeds across them, the characteristics of off-network areas (land cover, slope and elevation) and typical walking speeds across them, and the time to cross national borders. The friction surface merges all this information into one layer where the resulting pixel is the fastest travel speed from all the inputs*. Data sources for this methodological framework were a combination of OSM and Google distances to road data. The validation of accessibility data layers was conducted by comparing travel times estimates between pairs of human settlements derived from this methodology against driving times estimates from Google Maps directions applications: median difference was 13.7 minutes while the absolute difference was 30 minutes or less for 60 % of the tiles and 60 minutes or less for 80 % of the tiles. 
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![Global accessibility layers. Maps show travel time to the nearest human settlement in the year 2015 for three of the nine accessibility layers, (a) for settlement class 1 (>=5,000,000 and <50,000,000 people), (b) for settlement class 5 (>=100,000 and <200,000 people), and (c) for settlement class 9 (>=5,000 and <10,000 people) (Source: Nelson et al., 2019)](figs/nelson.PNG)
+
+::: 
+
+::::
+
+On the same dataset and methodological framework, @weiss2018 shows significant disparities on travel time of global populations grouped by World Bank income categories. They remind that this proposal include several limitations: high-speed train travel absent from the modelling, problems linked to grid cells characterisation (slope, dominant land use), ignorance of geopolitical conflicts, seasonal changed (floods, snow), etc. Thus, it is highlighted that this accessibility measure *should not be viewed as applicable at every moment, but rather a general estimate of accessibility during nominal travelling hours in the absence of adverse conditions*.
+
+
+## Comparing transport modes and data processing
+
+Several scientific contributions have focused their investigations on the effect of the mode of transports on amenities or opportunities. With unclear data sources, @wu2021 compared the relationship between population-weighted access and metropolitan population in 117 cities from 16 countries using 30-min cumulative access to jobs for 4 different modes of transport (walking, cycling, transit, car). It shows that the correlation between population and accessibility of different modes is strongest with car, followed by cycling, walking and transit. Small cities with good transit infrastructure can provide similar levels of access to jobs within 30 minutes as many large cities. These "small compact cities" being located in most European cities. 
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+@tenkanen2020 used a travel time matrix calculated for 2013, 2015 and 2018. It includes multimodal travel time (walking, cycling, public transport and private car) between all 250 metres grid cell centroids in the Capital Region of Helsinki in Finland. These travel time were calculated for the morning rush hour and midday for an average working day. Calculations are made on open data sources: OSM for walking; cycling network, Strava data (GPS), City bike data (OD) for bike, national road DB and floating car data for cars and OSM and Kalkati XML / GTFS for transit transport mode. Travel time comparisons were conducted with MetropAccess-Reititin, OpenTripPlanner, DORA and Google Maps to evaluate data accuracy. It can be noticed that all the data the project has been made available trough a dedicated [Zenodo repository](https://zenodo.org/record/3247564#.Y72Py3bMKUk).
+
+:::
+
+::: {.column width="5%"}
+
+:::
+
+::: {.column width="55%"}
+
+![The most accessible 10 percent of the grid cells in the area by different travel modes in Helsinki City Region (Source: Tenkanen, 2020)](figs/tenkanen.PNG)  
+::: 
+
+::::
+
+In Germany, @mocanu2021 investigated the potential for a mode shift from car to public transport for German commuters using a data-driven approach based mainly on open data sources. A commuter matrix is merged with travel time data for car and public transport to calculate a spatially disaggregated and mode-specific measures of accessibility. It is done at the Traffic Analysis Zones level (TAZ, 6633 territorial units in Germany). Car travel times come from the DEMO road network [@winkler2020]. DEMO travel times were validated by comparing its outputs to a sample of 10 000 TAZ to TAE queries to the Here Maps API. Public transport timetable is provided by the [DELFI](https://www.opendata-oepnv.de/ht/de/organisation/delfi/startseite?tx_vrrkit_view%5Bdataset_name%5D=deutschlandweite-sollfahrplandaten-gtfs&tx_vrrkit_view%5Baction%5D=details&tx_vrrkit_view%5Bcontroller%5D=View) initiative. This dataset, covering most of Germany contains 400 000 stops and 740 000 vehicle journeys per day from nearly 900 transport agencies. This study reveals that public transport accessibility to workplaces is three times poorer across Germany compared to access by car and concludes that the potential for a mode shift appears very low.  
+
+
+# A French case-study, to be extended ?
+
+The literature and data sources review demonstrates that numerous and growing initiatives exist on the subject of travel-time calculations. However, most studies cover specific areas of interest and specific destinations. We propose in this section to focus on a reproducible research framework, made with R and coordinated by RIATE engineers and by researchers specialized in health, accessibility and inequalities analysis [@ysebaert2021].
+
+The first results of this study have been presented during the Annual meeting of American Association of Geographers [@conti2022]. The research question was to evaluate how the closure of surgical services over the last 20 years have changed people's spatial access to hospitals. Three hypothesis were behind:
+
+(1) Smaller cities are more affected.
+(2) Strong inequalities exist between categories of the population (i.e. between white-collars and blue-collars).
+(3) The question of the choice of the service location by patients must be raised (e.g. is it the nearest or the second nearest hospital?). 
+
+From our point of view, this example clearly shows what could be done within GRANULAR activities: type of indicators, use of statistical attributes of origins (socio-economic characteristics of the population living, at the LAU level) and destinations (status of the hospital, capacities), territories comparisons according to several typologies (urban, peripheries, rural areas, etc.), providing synthetic measures and figures to summarize the results, etc. 
+
+
+
+## Origins, destinations and routing engine
+
+Origins are French metropolitan LAU (municipalities or *communes*, more than 35000 territorial units). Destinations are hospitals with surgery cares, a database built by researchers specialized in the field. This data is available for France only, but a possible extension of this work could be to use the GISCO database on hospitals presented above (possibly completed by OpenStreetMap).
+
+French municipalities can be characterised by a lot of indicators (employment by professional status and categories, demographic characteristics, urban-rural categories coming from typologies based on commuting data and functional criteria, etc.)
+
+Hospitals with surgery cares locations have additional statistical attributes, that may be useful to refine accessibility indicators (private or public, number of beds and places). This data is available for 2000 and 2018 thanks to the work of data collection made by researchers. 
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Origins: LAU city hall locations (35 228 points)](figs/origin_points.png)
+
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Destinations: hospitals with surgery cares (913  points in 2018) and statistical attributes (number of beds and public-private status)](figs/dest_points3.png)
+
+::: 
+
+::::
+
+Several travel time indicators by car have been calculated using the `osrm` R package, an interface between R and the OSRM API [@giraud2022]. 
+
+The result is a database available at LAU level characterising two aspects of accessibility to hospitals:
+
+**Distance to hospitals**: a set of 12 indicators, which include three thematic dimensions: (1) The temporal one: in 2000 and 2018 (measures computed with a static OpenStreetMap network, as it was provided in 2021). (2) The status of the hospital: travel time to the nearest public or private hospital. (3) The question of the population choice: travel time to the nearest, then to the second nearest one. 
+
+
+**Hospitals capacities**, which measures the number of beds and places in hospitals that can be reached inside the municipality, in 15 minutes, in 30 minutes, in 45 minutes and in 60 minutes by car. It includes the same thematic dimensions than the set of indicators related to travel time. 
+
+
+
+##  Basic indicators 
+
+Having origins, destinations and measuring travel time with an open source routing engine, it is possible to compute a set of very basic indicators, such as the time required to reach the nearest hospital (top left). For French municipalities, values range from less than 1 minute to 3 hours and a half. 
+We can easily produce other indicators, such as the difference between the first and the second hospital (top right), which highlights the question of the choice of the service for the population, a challenging issue for the national health system. 
+Depending on the POI attributes availability, it is possible to distinguish private and public situations (bottom left), or the evolution of their accessibility over the time (bottom right).
+
+Examples below are very simple results displayed on maps and can certainly serve as a basis for more in depth analysis.
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Travel time by car to the nearest hospital with surgery cares, in 2018](figs/04_TIME_ALL_2018.png)
+
+![Is the nearest hospital in 2018 public (red), private (blue) or without significant differences (grey)?](figs/08_PROX_PRIVPUB_2018.png)
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Difference of travel time between the nearest and the second nearest hospital in 2018](figs/12_HOP1_HOP2_2018.png)
+
+![Evolution of travel time by car between 2000 and 2018 to reach the nearest hospital](figs/14_HOP1_HOP2_DIFF.png)
+
+::: 
+
+::::
+
+## Combining it with POI attributes (capacities)
+
+The combination with POI attributes enables the creation of interesting indicators. The example below shows Rennes, in Western France. On black is displayed the location of the city and the neighbouring city hall that it is possible to reach from the Renne’s city hall by car at several thresholds of time. The circles show the hospital capacities, expressed in number of beds. The plot associated to the map on the rights shows that 420 beds are located in Rennes, 600 are reachable at less than 15 minutes by car, 780 at 30 minutes and more than 1000 at less than 1 hour.  
+
+![Hospitals beds with surgery cares that can be reached from Rennes in a 0-15-30-45-60 minutes by car neighbourhood](figs/prep_ex_Rennes.png)
+
+The situation is obviously not the same when looking at remote municipalities, such as Gap in the French Alps. 80 beds are located in the single hospital of the city. No other hospitals can be reached in a 60 minutes neighbourhood, raising the question of the choice of the population to access to surgery services.
+
+![Hospitals beds with surgery cares that can be reached from Gap in a 0-15-30-45-60 minutes by car neighbourhood](figs/prep_ex_Gap.png)
+
+Extending this method to the rest of the French municipalities, we can produce such maps: the number of beds in several functional neighbourhoods by car. 
+
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![](figs/beds_15mn.png)
+
+![](figs/beds_45mn.png)
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![](figs/beds_30mn.png)
+
+![](figs/beds_60mn.png)
+
+::: 
+
+::::
+
+
+## Combining it with administrative units attributes
+
+It is also possible to enrich the analysis with attributes associated to origins. In this case we use a simplification of a urban-rural typology produced by INSEE and we look for each category of the typology the distance between the population and the nearest hospital. 
+We can see on the plot that 50 % of the population living in a rural municipality is located at less than 26 minutes by car from the nearest hospital, while it is 5 minutes for municipalities belonging to the urban category. 
+
+
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Simplified French urban-rural typology (Source INSEE)](figs/urban_rural_typo.png)
+
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Time to reach the nearest hospital by urban-rural categories](figs/urban_rural_typo_time.png)
+
+
+::: 
+
+::::
+
+
+The same can be done with socio-economic characteristics. Having in France the employment by professional occupation at municipal level, it is possible to say that 70 % of people with executive occupations lives at less than 10 minutes by car from a hospital with surgery cares. While it is 28 minutes for farmers.
+
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+![Main professional status of employees of French municipalities (Source: INSEE)](figs/professional_status.png)
+
+
+:::
+
+::: {.column width="4%"}
+
+:::
+
+::: {.column width="48%"}
+
+![Time to reach the nearest hospital by professional categories](figs/professional_status_time.png)
+
+
+::: 
+
+::::
+
+
+The question for GRANULAR will be the availability at European level of this data at European level. We know that Eurostat will soon make available the last census with new indicators in the 1km grid, such as age-structure. It has to be followed carefully.
