@@ -1,4 +1,10 @@
-# Review data and methods : OpenStreetMap data and associated routing engine (OSRM) to produce novel data on rural areas in Europe
+<h1> <img src="logos//granular.png"
+  width="100"
+  height="100"
+  style="float:left;"
+  hspace="20">
+    Review data and methods : OpenStreetMap data and associated routing engine (OSRM) to produce novel data on rural areas in Europe 
+</h1>
 
 ## Context
 
@@ -16,13 +22,22 @@ The first part of the document presents at European scale the policy context and
 
 At the end, this report aims at providing a general research framework on the activities that will be held on task 3.3.1 of the GRANULAR project: Crowd-sources data based on OpenStreetMap.
 
+## Repository organisation
+
+This document is published using the [Quarto](https://quarto.org/) framework. It allows to publish high-quality articles, reports, books etc. in HTML format (among others). This repository is organised as follows: 
+
+- The main Quarto document is available in the [index.qmd](https://github.com/rysebaert/granular_qmd_template/blob/main/index.qmd) file. 
+- The deployed .html page corresponds to the [index.html](https://github.com/rysebaert/granular_qmd_template/blob/main/index.html) file. It uses the GitHub Pages to deploy the file on the Web. 
+- The figures displayed in the document are available in the [figs](https://github.com/rysebaert/granular_qmd_template/tree/main/figs) folder. 
+- Data used in the chunks of the .qmd file are available in the [data](https://github.com/rysebaert/granular_qmd_template) folder.
+- Bibliography is stored in a BibTeX format in the [bib](https://github.com/rysebaert/granular_qmd_template/blob/main/bib.bib) file.
+- Styles following the GRANULAR's graphical guidelines used by the .qmd file and deployed in the .html file are defined in the [styles.css](https://github.com/rysebaert/granular_qmd_template/blob/main/styles.css) file.  
+
+
 ## License
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-sa/4.0/)
 
 
-<center>
-<img src="logos/granular.png" width="200" align="middle">
-</center>
 <center>
 <p float="center">
 <img src="logos/riate.png" width="120" align="middle" hspace="80" vspace="80">
